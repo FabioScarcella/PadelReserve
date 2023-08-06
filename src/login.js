@@ -16,7 +16,7 @@ export class Login {
 
     await page.goto(this.url);
 
-    await waitForResponse(page, this.loginLoad + 1);
+    await waitForResponse(page, this.loginLoad);
 
     await page.type("#j_username", this.login);
     await page.type("#j_password", this.password);
@@ -24,6 +24,8 @@ export class Login {
     await page.click("#mbsc-form-control-3");
 
     await waitForResponse(page, this.loginRequest);
+
+    return true;
   }
 }
 
