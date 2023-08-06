@@ -1,6 +1,5 @@
 import "dotenv/config";
-import puppeteer from "puppeteer";
-import { waitForGetMethod } from "./utils/useWaitForResponse";
+import { waitForResponse } from "./utils/useWaitForResponse.js";
 
 export class Login {
   constructor(browser) {
@@ -12,32 +11,19 @@ export class Login {
     this.browser = browser;
   }
 
-  async waitForFirstLoad() {}
-
   async main() {
     const page = await this.browser.newPage();
 
     await page.goto(this.url);
 
-    let response = await waitForGetMethod(this.loginLoad, this.page);
-
-    if (!response) {
-      console.error("Wait for first load failed, proceeding to wait 5 seconds");
-      await new Promise((resolve) => setTimeout(resolve, 5000));
-    }
-
-    response = null;
+    await waitForResponse(page, this.loginLoad + 1);
 
     await page.type("#j_username", this.login);
     await page.type("#j_password", this.password);
 
     await page.click("#mbsc-form-control-3");
 
-    response = await waitForGetMethod(this.loginRequest, this.page);
-
-    await page.screenshot({ path: "logged_in.png" });
-
-    await this.browser.close();
+    await waitForResponse(page, this.loginRequest);
   }
 }
 
