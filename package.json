@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "dotenv": "^16.3.1",
+    "puppeteer": "^21.0.1"
+  },
+  "type": "module"
+  
+  
+}
