@@ -10,7 +10,7 @@ export class Reserve {
     this.time = process.env.TIME - 1;
   }
 
-  async scrollUntilVisible(targetElement, container) {
+  async scrollUntilVisible() {
     const childSelector = `[class*="bkc-pistas-disponibles"]`;
     const containerSelector = `[id="div-hores-disponibles-8"]`;
 
@@ -118,21 +118,20 @@ export class Reserve {
       .catch(() => false);
 
     while (!visible) {
-      const element = await this.page.$('[class*="pistas-hora-more"]');
-      await this.page.waitForSelector("#div-hores-disponibles-8");
-      const childDiv = await this.page.$(`#div-hores-disponibles-8`);
-      const parentElement = await childDiv.$x("..");
-      await this.scrollUntilVisible(element, parentElement[0]);
+      await this.scrollUntilVisible();
 
       hour = await this.page.$(selector);
       visible = await this.checkIfHourIsVisible(hour)
         .then(() => true)
         .catch(() => false);
-
       await this.delay(1500);
+      if (!visible) {
+        const element = await this.page.$('[class*="pistas-hora-more"]');
+        await element.click();
+      }
     }
     const containsClass = await hour.evaluate((element) => {
-      return element.classList.contains("pistas-hora-ok"); // Replace with the class name to check
+      return element.classList.contains("pistas-hora-ok");
     });
 
     if (containsClass) await hour.click();
@@ -141,6 +140,16 @@ export class Reserve {
       this.browser.close();
     }
   }
+
+  // async checkCourt(courts) {
+  //   //CHECK FOR PREFERED
+  //   const courtSelector = `#${courts[this.preferedCourt]}`;
+  //   const court = await this.page.$(courtSelector);
+  //   await court.evaluate((element) => {
+  //     debugger;
+  //     return element.children.classList.contains("text-red-d1"); // Replace with the class name to check
+  //   });
+  // }
 
   async selectCourt() {
     const containerSelector = `[id="form-listado-pistas-8"]`;
@@ -160,15 +169,37 @@ export class Reserve {
         ];
       return [];
     }, containerSelector);
+
     if (!childrens) {
-      console.log("UNDEFINED COURTS");
+      console.log("Courts not found");
       return;
     }
 
-    //CHECK FOR PREFERED
+    // close first court
+    for (const openC of childrens) {
+      await (async () => {
+        const c = await this.page.$(`#${openC}`);
+        const result = await c.evaluate((element) => {
+          return element.classList.contains("mbsc-collapsible-open");
+        });
+        if (result) {
+          const boundingBox = await c.boundingBox();
+          if (!boundingBox) {
+            console.log("No bounding box");
+            return;
+          }
+          const clickX = boundingBox.x + boundingBox.width / 2;
+          const clickY = boundingBox.y + boundingBox.height / 4;
+          await this.page.mouse.click(clickX, clickY);
+        }
+      })();
+    }
+
     const courtSelector = `#${childrens[this.preferedCourt]}`;
     const court = await this.page.$(courtSelector);
-    await court.click();
+
+    // const court await this.checkCourt(childrens);
+    //await court.click();
     await this.delay(500);
     await this.scrollDown(500);
 
@@ -198,3 +229,5 @@ export class Reserve {
     await this.selectCourt();
   }
 }
+
+//id="form-reservar-pista"
