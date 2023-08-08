@@ -248,5 +248,3 @@ export class Reserve {
     await this.selectCourt();
   }
 }
-
-//id="form-reservar-pista"

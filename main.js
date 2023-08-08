@@ -2,6 +2,7 @@ import puppeteer from "puppeteer";
 
 import Login from "./src/login.js";
 import { Reserve } from "./src/reserve.js";
+import { Pay } from "./src/pay.js";
 
 const main = async () => {
   const browser = await puppeteer.launch({ headless: false });
@@ -17,7 +18,10 @@ const main = async () => {
   }
 
   const reserve = new Reserve(browser);
-  reserve.main();
+  await reserve.main();
+
+  const pay = new Pay(browser);
+  await pay.main();
 };
 
 main();
