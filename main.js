@@ -80,6 +80,7 @@ while (true) {
     console.log("ACTIVE");
 
     await new Promise((resolve) => setTimeout(resolve, delay));
+    console.log(new Date());
     await main();
   } else {
     console.log("NOT ACTIVE, WAITING 1 MINUTE AND THEN CHECKING AGAIN");
