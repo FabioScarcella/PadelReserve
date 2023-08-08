@@ -5,6 +5,7 @@
   },
   "type": "module",
   "scripts": {
-    "start": "node main.js"
+    "start": "node main.js",
+    "heroku-postbuild": "mkdir ./.cache && mv /app/.cache/puppeteer ./.cache"
   }
 }
