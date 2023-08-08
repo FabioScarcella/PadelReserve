@@ -43,7 +43,8 @@ const writeFile = async () => {
 };
 
 const main = async () => {
-  const browser = await puppeteer.launch({ headless: false });
+  // const browser = await puppeteer.launch({ headless: false });
+  const browser = await puppeteer.launch();
 
   const login = new Login(browser);
 
