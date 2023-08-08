@@ -1,13 +1,25 @@
 import "dotenv/config";
+import fs from "fs";
+
 export class Reserve {
   constructor(browser) {
     this.browser = browser;
     this.page;
 
-    this.date = process.env.DATE;
-    this.hour = process.env.HOUR;
-    this.preferedCourt = process.env.PREFEREDCOURT - 1;
-    this.time = process.env.TIME - 1;
+    try {
+      const data = fs.readFileSync("config.json", "utf-8");
+      try {
+        const jsonObj = JSON.parse(data);
+        this.date = jsonObj.DATE;
+        this.hour = jsonObj.HOUR;
+        this.preferedCourt = jsonObj.PREFEREDCOURT - 1;
+        this.time = jsonObj.TIME - 1;
+      } catch (parseError) {
+        console.error(parseError);
+      }
+    } catch (err) {
+      console.error(err);
+    }
   }
 
   async scrollUntilVisible() {
@@ -109,6 +121,8 @@ export class Reserve {
     const date = await this.page.$(`[aria-label*="${this.date}"]`);
     await this.delay(500);
     if (date) await date.click();
+
+    await this.page.waitForSelector("#div-hores-disponibles-8");
 
     // CHECK IF SELECTOR IS VISIBLE FIRST
     const selector = `[data-hora="${this.hour}"]`;
