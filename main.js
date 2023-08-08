@@ -45,7 +45,7 @@ const writeFile = async () => {
 const main = async () => {
   // const browser = await puppeteer.launch({ headless: false });
   // const browser = await puppeteer.launch();
-  await puppeteer.launch({
+  const browser = await puppeteer.launch({
     headless: true,
     args: ["--no-sandbox", "--disable-setuid-sandbox"],
   });
