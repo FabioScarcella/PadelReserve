@@ -141,16 +141,6 @@ export class Reserve {
     }
   }
 
-  // async checkCourt(courts) {
-  //   //CHECK FOR PREFERED
-  //   const courtSelector = `#${courts[this.preferedCourt]}`;
-  //   const court = await this.page.$(courtSelector);
-  //   await court.evaluate((element) => {
-  //     debugger;
-  //     return element.children.classList.contains("text-red-d1"); // Replace with the class name to check
-  //   });
-  // }
-
   async selectCourt() {
     const containerSelector = `[id="form-listado-pistas-8"]`;
     const courtExpanded = `[aria-expanded="true"]`;
@@ -175,31 +165,60 @@ export class Reserve {
       return;
     }
 
-    // close first court
     for (const openC of childrens) {
-      await (async () => {
-        const c = await this.page.$(`#${openC}`);
-        const result = await c.evaluate((element) => {
-          return element.classList.contains("mbsc-collapsible-open");
-        });
-        if (result) {
-          const boundingBox = await c.boundingBox();
-          if (!boundingBox) {
-            console.log("No bounding box");
-            return;
-          }
-          const clickX = boundingBox.x + boundingBox.width / 2;
-          const clickY = boundingBox.y + boundingBox.height / 4;
-          await this.page.mouse.click(clickX, clickY);
+      const c = await this.page.$(`#${openC}`);
+      const result = await c.evaluate((element) => {
+        return element.classList.contains("mbsc-collapsible-open");
+      });
+
+      if (result) {
+        const boundingBox = await c.boundingBox();
+        if (!boundingBox) {
+          console.log("No bounding box");
+          continue; // Skip to the next iteration
         }
-      })();
+
+        const clickX = boundingBox.x + boundingBox.width / 2;
+        const clickY = boundingBox.y + boundingBox.height / 4;
+        await this.page.mouse.click(clickX, clickY);
+      }
     }
 
-    const courtSelector = `#${childrens[this.preferedCourt]}`;
-    const court = await this.page.$(courtSelector);
+    await this.delay(500);
 
-    // const court await this.checkCourt(childrens);
-    //await court.click();
+    let courtSelector = `#${childrens[this.preferedCourt]}`;
+    let court = await this.page.$(courtSelector);
+
+    //Check if this court is available
+    let checkCourt = true;
+    let courtNumber = 0;
+    while (checkCourt) {
+      const available = await court.evaluate((element, time) => {
+        debugger;
+        return (
+          !element.innerHTML.includes("[NO DISPONIBLE]") &&
+          !element
+            .querySelector("label")
+            .querySelectorAll("b")
+            [time].style.cssText.includes("darkred")
+        );
+      }, this.time);
+
+      if (available) {
+        checkCourt = false;
+        break;
+      }
+      courtSelector = `#${childrens[courtNumber]}`;
+      court = await this.page.$(courtSelector);
+      if (!court) {
+        console.log("No hours avaiable");
+        checkCourt = false;
+        return;
+      }
+      courtNumber++;
+    }
+
+    await court.click();
     await this.delay(500);
     await this.scrollDown(500);
 
