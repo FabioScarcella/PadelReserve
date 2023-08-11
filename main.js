@@ -18,7 +18,7 @@ const readFile = async () => {
       const jsonObj = JSON.parse(data);
       reserveTime = jsonObj.RESERVETIME;
       active = jsonObj.ACTIVE;
-      desiredDate = jsonObj.DATE;
+      desiredDate = jsonObj.RESERVEDAY;
     } catch (parseError) {
       console.error(parseError);
     }
@@ -83,6 +83,13 @@ const main = async () => {
   await browser.close();
 };
 
+function splitDelay(ms) {
+  const hour = new Date(ms).getHours();
+  const splitParts = (60 / 5) * hour; //every 5 minutes multiplied for the number of remaining hours
+  const timeSplitted = Math.ceil(ms / splitParts);
+  return { ms: timeSplitted, times: splitParts };
+}
+
 while (true) {
   await readFile();
   if (active) {
@@ -105,7 +112,23 @@ while (true) {
         .slice(11, 19)} to be active`
     );
 
-    await new Promise((resolve) => setTimeout(resolve, delay));
+    const sd = splitDelay(delay);
+    console.log(
+      `I'LL BE WAITING ${new Date(sd.ms * sd.times)
+        .toISOString()
+        .slice(11, 19)}`
+    );
+    console.log(new Date().getMinutes());
+    console.log(
+      `AND I'LL BE SLEEPING FOR ${new Date(sd.ms).toISOString().slice(11, 19)}`
+    );
+    let times = 0;
+    while (times < sd.times) {
+      await new Promise((resolve) => setTimeout(resolve, sd.ms));
+      console.log("I AM ACTIVE AND STILL WAITING");
+      times++;
+    }
+    console.log("Starting MAIN function");
     await main();
   } else {
     console.log("NOT ACTIVE, WAITING 5 MINUTES AND THEN CHECKING AGAIN");

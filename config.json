@@ -1,8 +1,9 @@
 {
   "ACTIVE": true,
-  "RESERVETIME": "14:38:01",
-  "DATE": "August 13",
-  "HOUR": "10:00",
+  "RESERVETIME": "05:00:01",
+  "RESERVEDAY": "August 12",
+  "DATE": "August 14",
+  "HOUR": "19:00",
   "PREFEREDCOURT": 2,
   "TIME": 2
 }
